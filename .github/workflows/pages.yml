@@ -1,0 +1,78 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run unit and contract tests
+        run: npm test
+
+      - name: Run browser smoke tests
+        run: npm run test:smoke
+
+      - name: Generate printable map
+        run: npm run build:print
+
+      - name: Check generated printable map
+        run: git diff --exit-code -- print.html
+
+      - name: Prepare static artifact
+        run: |
+          mkdir -p _site/assets
+          cp index.html print.html 404.html LICENSE-CODE LICENSE-CONTENT README.md _site/
+          cp -R css js _site/
+          cp assets/favicon.svg _site/assets/
+          cp assets/sample-text.md _site/assets/
+          cp assets/sample-reflection.md _site/assets/
+          cp assets/sample-board-plan.md _site/assets/
+          cp assets/sample-worksheet.md _site/assets/
+          cp assets/sample-lesson-record.md _site/assets/
+          touch _site/.nojekyll
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

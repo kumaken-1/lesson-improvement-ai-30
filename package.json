@@ -1,0 +1,16 @@
+{
+  "name": "lesson-improvement-generative-ai-30",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "playwright": "1.62.0"
+  },
+  "scripts": {
+    "build:print": "node scripts/build-print-page.mjs",
+    "test": "node --test tests/state.test.mjs tests/view-model.test.mjs tests/challenges.test.mjs tests/structure.test.mjs tests/print-page.test.mjs tests/docs.test.mjs tests/workflow.test.mjs",
+    "test:smoke": "node --test tests/smoke.test.mjs",
+    "test:all": "npm test && npm run test:smoke",
+    "test:content": "node --test tests/challenges.test.mjs",
+    "test:state": "node --test tests/state.test.mjs"
+  }
+}

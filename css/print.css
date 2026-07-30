@@ -1,0 +1,174 @@
+@page {
+  size: A4 portrait;
+  margin: 12mm;
+}
+
+html,
+body {
+  color: #000;
+  background: #fff;
+  font-size: 10pt;
+}
+
+body {
+  line-height: 1.45;
+}
+
+/* 見出しを詰める。詰めないと1回目が1ページ目に入らず、
+   ほぼ空白のページが先頭にできる。 */
+.hero {
+  padding: 0 0 2mm;
+  border-block-end: 1pt solid #555;
+  color: #000;
+  background: none;
+}
+
+.hero h1 {
+  margin: 0 0 1mm;
+  font-size: 13pt;
+}
+
+.hero__lead {
+  margin: 0;
+  font-size: 10pt;
+}
+
+/* 1枚ずつ選んで刷る使い方を、紙の1枚目で先に伝える。 */
+.print-howto {
+  margin: 0;
+  font-size: 9pt;
+  font-weight: 700;
+}
+
+.hero__note,
+.skip-link,
+.guide,
+.summary,
+.reset-controls,
+.storage-warning,
+button,
+nav,
+dialog,
+#toast {
+  display: none !important;
+}
+
+.site-main {
+  width: 100%;
+  padding: 5mm 0 0;
+}
+
+/* 1列にする。2列（列幅91mm）だと1回分の高さが1154〜1313pxになり、
+   A4の印刷可能高さ1032pxを30回すべてが超えるため、break-inside: avoid を
+   守れず必ず途中で分割される。1列なら896〜1001pxで、1回が1ページに収まる。
+   minmax(0, 1fr) にしてあるのは、1fr の最小値が auto（min-content）で、
+   折り返せない中身があると列が紙幅を越えて押し広げられるため。 */
+.card-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4mm;
+}
+
+.print-challenge {
+  break-inside: avoid;
+  min-width: 0;
+  padding: 4mm;
+  border: 1pt solid #555;
+  border-radius: 2mm;
+  font-size: 9pt;
+  overflow-wrap: anywhere;
+}
+
+.print-check {
+  margin: 0 0 1mm;
+  font-weight: 700;
+}
+
+.print-category {
+  margin: 0 0 1mm;
+  font-size: 8pt;
+}
+
+.print-title {
+  margin: 0 0 2mm;
+  font-size: 11pt;
+  font-weight: 700;
+}
+
+.print-intro {
+  margin: 0 0 2mm;
+}
+
+.print-label {
+  margin: 2mm 0 1mm;
+  padding-block-start: 1.5mm;
+  border-block-start: 0.5pt solid #aaa;
+  font-weight: 700;
+}
+
+.print-steps {
+  margin: 0 0 2mm;
+  padding-inline-start: 5mm;
+}
+
+.print-help {
+  font-size: 8pt;
+}
+
+.print-prompt {
+  margin: 0 0 2mm;
+  padding: 2mm;
+  border: 0.5pt solid #555;
+  /* 全30回に共通で付く制約を、本文と別の行に出す */
+  white-space: pre-line;
+}
+
+/* どこまで書けば終わりかを、紙でも先に示す */
+.print-core {
+  margin: 0 0 1mm;
+  font-weight: 700;
+}
+
+.print-reply {
+  margin: 0 0 2mm;
+  font-style: italic;
+}
+
+.print-hints,
+.print-safety {
+  margin: 0 0 1mm;
+  font-size: 8pt;
+}
+
+/* 画面では入力欄になる場所。紙では手書きの記入欄にする。
+   かつてラベルと下線を同じ要素に入れて nowrap にしていたため、ラベル文まで
+   折り返せなくなり、列幅を押し広げて右の列が切れた。折り返しは必ず許す。
+   overflow: hidden も付けない。付けると切れたことに気づけない。 */
+.print-write {
+  margin: 0 0 1mm;
+  overflow-wrap: anywhere;
+}
+
+/* 手書き用の罫線。文字で引くと紙幅に合わないため、罫線で列幅いっぱいに伸ばす。
+   高さは6mm。1回分がA4の印刷可能高さ（273mm）を超えると空白ページができるため、
+   罫線3本ぶんの高さがそのまま紙数に効く。変えるときは実PDFのページ数を見る。 */
+.print-rule {
+  height: 6mm;
+  margin: 0 0 1mm;
+  border-block-end: 0.5pt solid #555;
+}
+
+/* 採用・修正・却下。紙でも1つだけ選べるようにする。 */
+.print-decide {
+  margin: 0 0 2mm;
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.print-decide li {
+  margin: 0 0 0.5mm;
+}
+
+* {
+  print-color-adjust: economy;
+}

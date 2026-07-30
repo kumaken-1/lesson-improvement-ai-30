@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="教材研究、発問、見取り、振り返りを題材に、明日の授業で変える一点を見つける30回です。">
+    <title>生成AI 30のチャレンジⅢ ～授業改善～</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/print.css" media="print">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">本文へスキップ</a>
+
+    <header class="hero">
+      <div class="hero__inner">
+        <h1>生成AI 30のチャレンジⅢ ～授業改善～</h1>
+        <p class="hero__lead">気になっている授業から、ひとつ試すところから。</p>
+        <p class="hero__note">1回だけでも、順番どおりでなくてもかまいません。</p>
+      </div>
+    </header>
+
+    <main id="main" class="site-main" tabindex="-1">
+      <section class="guide" aria-labelledby="guide-title">
+        <h2 id="guide-title">使い方</h2>
+        <p>1回10分ほどです。完成した指導案を作る講座ではありません。教材研究、発問、見取り、振り返りのどこか一点について、自分の判断を一つ前へ進めることが目的です。</p>
+        <p>回をひらくと、まず<strong>送る前に自分の考えを一言</strong>書く欄が出ます。先に自分の考えを置いてから、生成AIに送ります。返事が来たら読んで、<strong>採用・修正・却下</strong>のどれかを決めます。そのあともう一言返し、最後に<strong>今日変える一点</strong>を書きます。</p>
+        <p><strong>時間がないときは、最初の考えと最後の一点だけ書けば完了です。</strong>判断の理由を書く欄は、必要な人だけが開けるようにしてあります。書く場所の多さで止まらないようにするためです。</p>
+        <p>AIに送る文には、<strong>Web検索をせず、渡した情報だけを使い、各項目を2文以内にする</strong>という制約が全30回とも付いています。長く整った回答や、検索してきた権威ある記述は、教師の判断を弱めます。この講座で必要なのは、短時間で吟味できる分量の返事です。</p>
+        <p>AIの返事は完成品ではなく材料です。<strong>却下を選んで終わってよい回もあります。</strong>AIを使わないほうが、子どもが迷い、言葉を探し、教材や友達と直接向き合える場面では、使わない判断がその回の結論です。</p>
+        <p>学習指導要領の記述や教科の理論をAIに尋ねる回はありません。AIは平然と存在しない記述を作ります。事実は原典で確かめてください。この講座でAIに渡すのは、自分が持っている教材、授業案、授業記録、自分の考えだけです。</p>
+        <p>生成AIを開けないときは、文章を読んで「どんな返事が来そうか」を考えるだけでもかまいません。</p>
+      </section>
+
+      <section class="guide" aria-labelledby="materials-title">
+        <h2 id="materials-title">練習用の素材</h2>
+        <p>資料を貼ったり添付したりする回では、手元に適したものがないと止まってしまいます。そのための素材を用意しました。<strong>すべて架空の内容で、実在の学校・自治体・人物とは関係ありません。</strong>子どもの名前にあたる部分は「児童A」などに置き換えてあります。</p>
+        <p>この5件には、<strong>教室で失敗しやすい形をわざと入れてあります。</strong>直すところを探す練習に使ってください。</p>
+        <ul>
+          <li><a href="./assets/sample-text.md">架空の物語文教材</a>（物語文で子どもの読みが分かれる場所を探すとき）</li>
+          <li><a href="./assets/sample-reflection.md">架空の振り返りの記述</a>（前の時間の記述から現在地を読むとき）</li>
+          <li><a href="./assets/sample-board-plan.md">架空の板書計画</a>（板書が教師のまとめになっているとき）</li>
+          <li><a href="./assets/sample-worksheet.md">架空のワークシート</a>（ワークシートが答えを先に見せているとき）</li>
+          <li><a href="./assets/sample-lesson-record.md">架空の授業記録</a>（授業記録から次の一点を見つけるとき）</li>
+        </ul>
+        <p>実際の指導案や授業記録には、子どもの氏名や学習の記録が残っていることがあります。まずはこちらで試してください。</p>
+      </section>
+
+      <section id="summary" class="summary" aria-label="試した数">
+        <p>読み込んでいます。</p>
+      </section>
+
+      <div class="reset-controls" hidden>
+        <button id="reset-tried" type="button" aria-controls="reset-confirmation" aria-expanded="false">記録を消す</button>
+        <div id="reset-confirmation" class="reset-confirmation" hidden>
+          <p>「やってみた」の記録を全部消しますか？</p>
+          <button id="confirm-reset" type="button">消す</button>
+          <button id="cancel-reset" type="button">やめる</button>
+        </div>
+      </div>
+
+      <div id="storage-warning" class="storage-warning" role="status" hidden>
+        この端末では記録を保存できません。<a href="./print.html">印刷用の一覧をご利用ください。</a>
+      </div>
+
+      <nav id="filters" class="filter-bar" aria-label="授業改善の場面でしぼりこむ">
+        <p>読み込んでいます。</p>
+      </nav>
+
+      <section class="list-section" aria-labelledby="list-title">
+        <h2 id="list-title">30回の一覧</h2>
+        <div id="challenge-list" class="card-grid">
+          <p class="loading-note">読み込んでいます。</p>
+          <noscript>
+            <p>表示するにはJavaScriptを有効にしてください。使えない場合は<a href="./print.html">印刷用の一覧</a>をご利用ください。</p>
+          </noscript>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="challenge-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-header">
+        <h2 id="dialog-title">この回</h2>
+        <button id="close-dialog" type="button">閉じる</button>
+      </div>
+      <div id="challenge-detail"></div>
+      <div id="dialog-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    </dialog>
+
+    <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

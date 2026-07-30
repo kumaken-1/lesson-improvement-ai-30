@@ -1,0 +1,839 @@
+:root {
+  --ink: #203047;
+  --muted: #5c6878;
+  --paper: #fffdf7;
+  --surface: #fff;
+  --focus: #005fcc;
+  --radius: 14px;
+  --shadow: 0 8px 24px rgb(32 48 71 / 10%);
+  --content-width: 1120px;
+  --label-size: 0.82rem;
+
+  /* 操作の種類ごとの色。ラベルとアイコンが主、色は従。
+     色が見分けられなくても、ラベルだけで何をするか決まるようにしてある。 */
+  --asis-line: #185fa5;
+  --asis-bg: #e6f1fb;
+  --asis-ink: #0c447c;
+
+  --paste-line: #0f6e56;
+  --paste-bg: #e1f5ee;
+  --paste-ink: #085041;
+
+  --attach-line: #534ab7;
+  --attach-bg: #eeedfe;
+  --attach-ink: #3c3489;
+
+  --fill-line: #a3701a;
+  --fill-bg: #faeeda;
+  --fill-ink: #633806;
+
+  /* 教師が自分で決める場面。送り方の色とは別に持つ。 */
+  --self-line: #3d4a5c;
+  --self-bg: #e9eef4;
+  --self-ink: #2a3543;
+
+  /* 注意。この色は他の役割で使わない。 */
+  --warn-line: #a32d2d;
+  --warn-bg: #fcebeb;
+  --warn-ink: #791f1f;
+
+  --done: #1f7a5c;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color: var(--ink);
+  background: var(--paper);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  line-height: 1.7;
+  font-family: "BIZ UDPGothic", "Yu Gothic", sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+h1,
+h2,
+h3,
+p,
+ol,
+ul {
+  margin-block-start: 0;
+}
+
+h1,
+h2 {
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+button {
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+button:hover {
+  background: #f2f6f8;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.icon {
+  flex: none;
+  vertical-align: -0.2em;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  inset-block-start: 0.5rem;
+  inset-inline-start: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: #fff;
+  background: var(--focus);
+  transform: translateY(-150%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.hero {
+  padding: clamp(2.5rem, 7vw, 5rem) max(1.5rem, calc((100% - var(--content-width)) / 2));
+  color: #fff;
+  background: #234f58;
+}
+
+.hero__inner {
+  max-width: 780px;
+}
+
+.hero h1 {
+  margin-block-end: 0.75rem;
+  font-size: clamp(1.9rem, 5vw, 3.4rem);
+}
+
+.hero__lead {
+  margin-block-end: 0.4rem;
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  font-weight: 700;
+}
+
+.hero__note {
+  margin-block-end: 0;
+  color: #ffe9a8;
+  font-weight: 700;
+}
+
+.site-main {
+  width: min(calc(100% - 3rem), var(--content-width));
+  margin-inline: auto;
+  padding-block: clamp(2rem, 5vw, 3.5rem) 5rem;
+}
+
+.field-note {
+  margin-block-end: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.guide,
+.summary {
+  margin-block-end: 1.25rem;
+  padding: clamp(1.1rem, 3vw, 1.75rem);
+  border: 1px solid #dce6e5;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.guide h2 {
+  margin-block-end: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.guide p {
+  margin-block-end: 0.6rem;
+}
+
+.guide p:last-child {
+  margin-block-end: 0;
+}
+
+.summary__count {
+  margin-block-end: 0.25rem;
+  font-size: 1.05rem;
+}
+
+.summary__count strong {
+  font-size: 1.6rem;
+}
+
+.reset-controls {
+  margin-block-end: 1.25rem;
+}
+
+.reset-confirmation {
+  margin-block-start: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #bdccd2;
+  border-radius: 0.75rem;
+  background: #f5f9f8;
+}
+
+.reset-confirmation p {
+  margin-block-end: 0.75rem;
+  font-weight: 700;
+}
+
+.reset-confirmation button + button {
+  margin-inline-start: 0.5rem;
+}
+
+.quiet-button {
+  border-color: #c3ccd4;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.storage-warning {
+  margin-block-end: 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--warn-line);
+  border-radius: 0.75rem;
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+  font-weight: 700;
+}
+
+.filter-bar {
+  margin-block-end: 2rem;
+  padding-block: 1rem;
+  border-block: 1px solid #dce2e7;
+}
+
+.filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-button__count {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.filter-button[aria-pressed="true"] {
+  color: #fff;
+  background: var(--ink);
+}
+
+.filter-button[aria-pressed="true"] .filter-button__count {
+  color: #cfd8e0;
+}
+
+.list-section h2 {
+  margin-block-end: 1rem;
+  font-size: 1.3rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.1rem;
+}
+
+.loading-note {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem;
+  border: 1px solid #d8e0e5;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.card--tried {
+  background: #f7fbf9;
+}
+
+.card__top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-block-end: 0;
+}
+
+.card__title {
+  margin-block: 0.15rem;
+  font-size: 1.12rem;
+}
+
+.card__intro {
+  margin-block-end: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.card__status {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-block: auto 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.card--tried .card__status {
+  color: var(--done);
+  font-weight: 700;
+}
+
+.card__open {
+  width: 100%;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #eef2f4;
+  color: #41505f;
+}
+
+.chip--asis {
+  background: var(--asis-bg);
+  color: var(--asis-ink);
+}
+
+.chip--paste {
+  background: var(--paste-bg);
+  color: var(--paste-ink);
+}
+
+.chip--attach {
+  background: var(--attach-bg);
+  color: var(--attach-ink);
+}
+
+.chip--tried {
+  background: #e6f4ee;
+  color: #14543f;
+}
+
+/* ---- 詳細 ---- */
+
+.detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-block-end: 0.85rem;
+}
+
+.detail__intro p {
+  margin-block-end: 0.4rem;
+}
+
+.detail__intro {
+  margin-block-end: 1.5rem;
+}
+
+.block {
+  margin-block-end: 1rem;
+  padding-inline-start: 0.9rem;
+  border-inline-start: 4px solid #c3ccd4;
+}
+
+.block__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-block-end: 0.6rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: var(--label-size);
+  font-weight: 700;
+}
+
+.block--asis {
+  border-inline-start-color: var(--asis-line);
+}
+
+.block--asis .block__label {
+  background: var(--asis-bg);
+  color: var(--asis-ink);
+}
+
+.block--paste {
+  border-inline-start-color: var(--paste-line);
+}
+
+.block--paste .block__label {
+  background: var(--paste-bg);
+  color: var(--paste-ink);
+}
+
+.block--attach {
+  border-inline-start-color: var(--attach-line);
+}
+
+.block--attach .block__label {
+  background: var(--attach-bg);
+  color: var(--attach-ink);
+}
+
+.block--fill {
+  border-inline-start-color: var(--fill-line);
+}
+
+.block--fill .block__label {
+  background: var(--fill-bg);
+  color: var(--fill-ink);
+}
+
+/* 送る前の一言、採用・修正・却下、変える一点。
+   AIに送る操作ではなく教師が決める場面なので、送り方の色とは分ける。 */
+.block--self {
+  border-inline-start-color: var(--self-line);
+}
+
+.block--self .block__label {
+  background: var(--self-bg);
+  color: var(--self-ink);
+}
+
+.self-question {
+  margin-block-end: 0.5rem;
+  font-weight: 700;
+}
+
+/* どこまで書けば終わりかを、開いてすぐに示す。 */
+.core-note {
+  margin-block-end: 1rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.6rem;
+  background: var(--self-bg);
+  color: var(--self-ink);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.reason-field {
+  margin-block-start: 0.6rem;
+}
+
+/* 全30回に共通で付く制約。本文と混ざらないよう行を分ける。 */
+.prompt__limits {
+  display: block;
+  margin-block-start: 0.5rem;
+  font-size: 0.92rem;
+}
+
+.line-input {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.4rem 0.7rem;
+  border: 2px solid var(--self-line);
+  border-radius: 0.5rem;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.decide-list {
+  display: grid;
+  gap: 0.4rem;
+  margin-block-end: 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.decide-button {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: start;
+  font-weight: 400;
+  border-color: var(--self-line);
+  color: var(--self-ink);
+  background: var(--surface);
+}
+
+.decide-button__head {
+  flex: none;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--self-bg);
+  font-size: var(--label-size);
+  font-weight: 700;
+}
+
+.decide-button--on {
+  color: #fff;
+  background: var(--self-line);
+}
+
+.decide-button--on .decide-button__head {
+  background: #fff;
+  color: var(--self-ink);
+}
+
+.steps {
+  margin-block-end: 0.75rem;
+  padding-inline-start: 1.4rem;
+}
+
+.steps__item {
+  margin-block-end: 0.3rem;
+}
+
+/* 手順の中に置くが、指で押せる大きさを確保するため独立した行にする。 */
+.help {
+  display: block;
+}
+
+.help__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 0.2rem 0.6rem;
+  border: 0;
+  border-radius: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--focus);
+  background: none;
+  text-decoration: underline;
+}
+
+.help__panel {
+  display: block;
+  margin-block: 0.35rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.6rem;
+  background: #eef2f7;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: #2c3a4a;
+}
+
+.prompt {
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  font-family: "BIZ UDGothic", "Yu Gothic", sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.8;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  margin-block-end: 0;
+}
+
+.block--asis .prompt {
+  border-color: var(--asis-line);
+}
+
+.block--paste .prompt {
+  border-color: var(--paste-line);
+}
+
+.block--attach .prompt {
+  border-color: var(--attach-line);
+}
+
+.prompt--fill {
+  border-color: var(--fill-line);
+  background: var(--fill-bg);
+  color: var(--fill-ink);
+}
+
+.blank-input {
+  min-width: 8rem;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 0.3rem 0.6rem;
+  border: 2px solid var(--fill-line);
+  border-radius: 0.5rem;
+  font: inherit;
+  color: var(--ink);
+  background: #fffdf5;
+}
+
+.hints {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-block-end: 0.6rem;
+}
+
+.hints__label {
+  font-size: var(--label-size);
+  color: var(--muted);
+}
+
+.hint {
+  padding: 0.2rem 0.85rem;
+  border-color: var(--fill-line);
+  color: var(--fill-ink);
+  font-size: 0.88rem;
+  font-weight: 400;
+  background: #fffdf5;
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin-block-start: 0.6rem;
+  color: #fff;
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.copy-button:hover {
+  background: #34455e;
+}
+
+.block--asis .copy-button {
+  border-color: var(--asis-line);
+  background: var(--asis-line);
+}
+
+.block--paste .copy-button {
+  border-color: var(--paste-line);
+  background: var(--paste-line);
+}
+
+.block--attach .copy-button {
+  border-color: var(--attach-line);
+  background: var(--attach-line);
+}
+
+.block--fill .copy-button {
+  border-color: #7d5612;
+  background: #7d5612;
+}
+
+.reply {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-block: 1.1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.6rem;
+  background: #eef2f4;
+  font-size: 0.95rem;
+}
+
+.safety {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-block: 1.25rem 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--warn-line);
+  border-radius: 0.6rem;
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+  font-size: 0.9rem;
+}
+
+.detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-block-start: 1.25rem;
+  padding-block-start: 1rem;
+  border-block-start: 1px solid #dce2e7;
+}
+
+.tried-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-color: var(--done);
+  color: var(--done);
+}
+
+.tried-button--on {
+  color: #fff;
+  background: var(--done);
+}
+
+.tried-button--on:hover {
+  background: #196349;
+}
+
+dialog {
+  width: min(680px, calc(100% - 2rem));
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  padding: clamp(1.1rem, 3vw, 1.75rem);
+  overflow: auto;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 24px 60px rgb(20 31 45 / 35%);
+}
+
+dialog::backdrop {
+  background: rgb(20 31 45 / 68%);
+}
+
+.dialog-header {
+  position: sticky;
+  z-index: 2;
+  inset-block-start: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-block-end: 0.75rem;
+  padding-block: 0.25rem 0.6rem;
+  background: var(--surface);
+}
+
+.dialog-header h2 {
+  margin-block-end: 0;
+  font-size: 1.25rem;
+}
+
+.dialog-header button {
+  flex: none;
+  padding-inline: 0.9rem;
+}
+
+.screen-reader-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+#toast {
+  position: fixed;
+  z-index: 20;
+  inset-inline: 1rem;
+  inset-block-end: 1rem;
+  width: fit-content;
+  max-width: min(32rem, calc(100% - 2rem));
+  margin-inline: auto;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  color: #fff;
+  background: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+#dialog-toast {
+  position: sticky;
+  z-index: 2;
+  inset-block-end: 0;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1rem auto 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  color: #fff;
+  background: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+#toast:empty,
+#dialog-toast:empty {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .hero,
+  .site-main {
+    width: 100%;
+    padding-inline: 1rem;
+  }
+
+  .card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detail__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detail__actions button {
+    width: 100%;
+  }
+
+  dialog {
+    width: calc(100% - 1rem);
+    max-height: calc(100vh - 1rem);
+    max-height: calc(100dvh - 1rem);
+    padding: 1rem;
+  }
+
+  .blank-input {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
