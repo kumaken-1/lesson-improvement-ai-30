@@ -10,17 +10,10 @@ import {
   toggleTried,
 } from "./state.js";
 import {
-  CLOSING_LABEL,
-  CLOSING_TEXT,
-  CORE_NOTE,
-  DECIDE_LABEL,
+  CLOSING_NOTE,
   DECIDE_NOTE,
-  DECIDE_REASON_LABEL,
-  DECIDE_REASON_TOGGLE,
   FILL_TYPE,
   HELP_TEXTS,
-  HYPOTHESIS_LABEL,
-  HYPOTHESIS_NOTE,
   SAFETY_NOTE,
   buildFilledText,
   promptLimits,
@@ -66,20 +59,11 @@ let closeHandled = true;
 // 授業記録や子どもの発言に触れた言葉が端末に残らないようにするため、
 // 「やってみた」の印以外は一切保存しない。
 let blankDraft = "";
-let hypothesisDraft = "";
-let decideChoice = "";
-let reasonDraft = "";
-let nextDraft = "";
-// 理由の記入欄は、判断を選ぶまで出さない。開いたかどうかは開き直しても保つ。
-let reasonOpen = false;
+let sendDraft = "";
 
 function clearDrafts() {
   blankDraft = "";
-  hypothesisDraft = "";
-  decideChoice = "";
-  reasonDraft = "";
-  nextDraft = "";
-  reasonOpen = false;
+  sendDraft = "";
 }
 
 function el(tag, options = {}, children = []) {
@@ -234,72 +218,45 @@ function stepList(steps) {
   ])));
 }
 
-// 一行だけ書く欄。書いた言葉はこの変数の中だけに置き、どこへも送らない。
-// 文の中に置くときだけ、2回目の空欄と同じインラインの見た目にする。
-function lineInput(id, value, placeholder, onInput, className = "line-input") {
-  const input = el("input", {
-    type: "text",
-    id,
-    className,
-    value,
-    placeholder,
-    autocomplete: "off",
-    maxLength: 80,
-  });
-  input.addEventListener("input", () => onInput(input.value));
-  return input;
-}
-
-// AIに送る前に、自分の考えを先に置く。
-// 比べる相手がないと、返事の整った文がそのまま自分の考えになる。
-function hypothesisBlock(model) {
-  const children = [
-    el("p", { className: "block__label" }, [
-      createIcon("note"),
-      el("span", { text: HYPOTHESIS_LABEL }),
-    ]),
-    el("p", { className: "self-question", text: model.hypothesis.text }),
-  ];
-  // 空欄をうめて送る回では、1回目の文の空欄がそのまま自分の考えの置き場所になる。
-  // ここにもう一つ入力欄を置くと、同じことを2回書かせることになる。
-  if (model.promptBlank) {
-    children.push(el("p", {
-      className: "field-note",
-      text: "書いた言葉は、下の1回目の文の空欄にそのまま入ります。",
-    }));
-  } else {
-    children.push(lineInput("hypothesis-input", hypothesisDraft, model.hypothesis.hint, (value) => {
-      hypothesisDraft = value;
-    }));
-  }
-  children.push(el("p", { className: "hints" }, [
-    el("span", { className: "hints__label", text: "例：" }),
-    el("button", {
-      type: "button",
-      className: "hint",
-      text: model.hypothesis.hint,
-      "data-hyphint": model.hypothesis.hint,
-    }),
-  ]));
-  children.push(el("p", { className: "field-note", text: HYPOTHESIS_NOTE }));
-  return el("section", { className: "block block--self" }, children);
-}
-
 // 全30回の1回目に同じ制約を付ける。回ごとの本文には書かない。
 function limitsLine(model) {
   return el("span", { className: "prompt__limits", text: promptLimits(model.send.type) });
 }
 
+// 空欄をうめて送る回。文そのものが入力欄になる。
+// 自分の見立てを書く行為と、送る文を組み立てる行為を1つにする。
 function promptWithBlank(model) {
   const { before, after } = splitTemplate(model.send.prompt);
-  const input = lineInput("hypothesis-input", hypothesisDraft, model.hypothesis.hint, (value) => {
-    hypothesisDraft = value;
-  }, "blank-input");
+  const input = el("input", {
+    type: "text",
+    id: "send-input",
+    className: "blank-input",
+    value: sendDraft,
+    placeholder: model.send.hint ?? "",
+    autocomplete: "off",
+    maxLength: 80,
+  });
+  input.addEventListener("input", () => {
+    sendDraft = input.value;
+  });
   return el("p", { className: "prompt prompt--fill", "data-prompt": "send" }, [
     el("span", { text: before }),
     input,
     el("span", { text: after }),
     limitsLine(model),
+  ]);
+}
+
+function sendHints(model) {
+  if (!model.promptBlank || !model.send.hint) return null;
+  return el("p", { className: "hints" }, [
+    el("span", { className: "hints__label", text: "例：" }),
+    el("button", {
+      type: "button",
+      className: "hint",
+      text: model.send.hint,
+      "data-sendhint": model.send.hint,
+    }),
   ]);
 }
 
@@ -310,6 +267,7 @@ function promptBlock(model) {
       el("span", { text: `1回目 — ${model.sendType.label}` }),
     ]),
     stepList(model.steps.send),
+    sendHints(model),
     model.promptBlank ? promptWithBlank(model) : el("p", {
       className: "prompt",
       "data-prompt": "send",
@@ -326,7 +284,7 @@ function promptBlock(model) {
       createIcon("copy"),
       el("span", { text: model.promptBlank ? "うめた文をコピー" : "この文章をコピー" }),
     ]),
-  ]);
+  ].filter(Boolean));
 }
 
 function fillBlock(model) {
@@ -375,66 +333,6 @@ function fillBlock(model) {
   ]);
 }
 
-// 採用・修正・却下を、本文に書いた注意ではなく画面の行為にする。
-// 選んだ結果は端末に残さないので、押した印はこの画面を開いている間だけ残る。
-function decideBlock(model) {
-  return el("section", { className: "block block--self" }, [
-    el("p", { className: "block__label" }, [
-      createIcon("decide"),
-      el("span", { text: DECIDE_LABEL }),
-    ]),
-    el("ul", { className: "decide-list" }, model.decideChoices.map((choice) => el("li", {}, [
-      el("button", {
-        type: "button",
-        className: decideChoice === choice.id
-          ? "decide-button decide-button--on"
-          : "decide-button",
-        "data-decide": choice.id,
-        "aria-pressed": String(decideChoice === choice.id),
-      }, [
-        el("span", { className: "decide-button__head", text: choice.head }),
-        el("span", { text: choice.text }),
-      ]),
-    ]))),
-    el("p", { className: "field-note", text: DECIDE_NOTE }),
-    // 判断は残すが、理由は深めたい人だけが開く。
-    // 4か所すべて埋めないと終わらない教材に見せないため、初期表示しない。
-    el("button", {
-      type: "button",
-      className: "quiet-button",
-      id: "reason-toggle",
-      "data-reason-toggle": "open",
-      "aria-expanded": String(reasonOpen),
-      "aria-controls": "reason-field",
-      text: DECIDE_REASON_TOGGLE,
-      hidden: decideChoice === "",
-    }),
-    el("div", { className: "reason-field", id: "reason-field", hidden: !reasonOpen }, [
-      el("p", { className: "self-question", text: DECIDE_REASON_LABEL }),
-      lineInput("reason-input", reasonDraft, "", (value) => {
-        reasonDraft = value;
-      }),
-    ]),
-  ]);
-}
-
-function closingBlock() {
-  return el("section", { className: "block block--self" }, [
-    el("p", { className: "block__label" }, [
-      createIcon("flag"),
-      el("span", { text: CLOSING_LABEL }),
-    ]),
-    el("p", { className: "self-question", text: CLOSING_TEXT }),
-    lineInput("next-input", nextDraft, "", (value) => {
-      nextDraft = value;
-    }),
-    el("p", {
-      className: "field-note",
-      text: "残しておきたいときは、手帳か指導案に書き写してください。この欄は画面を閉じると消えます。",
-    }),
-  ]);
-}
-
 function renderDetail() {
   const challenge = getChallengeById(challenges, activeId);
   if (!challenge) return;
@@ -448,15 +346,22 @@ function renderDetail() {
         createIcon("check"), el("span", { text: "やってみた" }),
       ]) : null,
     ]),
-    el("p", { className: "core-note", text: CORE_NOTE }),
     el("div", { className: "detail__intro" },
       model.intro.split("\n").map((line) => el("p", { text: line }))),
-    hypothesisBlock(model),
     promptBlock(model),
-    el("p", { className: "reply" }, [createIcon("arrow"), el("span", { text: model.reply })]),
-    decideBlock(model),
+    // 採用・修正・却下は、記入欄ではなく文で伝える。10回講座・校務版と操作の型を変えない。
+    el("p", { className: "reply" }, [
+      createIcon("arrow"),
+      el("span", {}, [
+        el("span", { text: model.reply }),
+        el("span", { className: "reply__decide", text: DECIDE_NOTE }),
+      ]),
+    ]),
     fillBlock(model),
-    closingBlock(),
+    el("p", { className: "closing-note" }, [
+      createIcon("flag", { size: 16 }),
+      el("span", { text: CLOSING_NOTE }),
+    ]),
     el("p", { className: "safety" }, [
       createIcon("warning", { size: 16 }),
       el("span", { text: SAFETY_NOTE }),
@@ -554,7 +459,7 @@ function promptTextFor(name) {
   if (!challenge) return "";
   if (name === "fill") return buildFilledText(challenge.followUp.template, blankDraft);
   const body = usesPromptBlank(challenge)
-    ? buildFilledText(challenge.send.prompt, hypothesisDraft)
+    ? buildFilledText(challenge.send.prompt, sendDraft)
     : challenge.send.prompt;
   return withLimits(body, challenge.send.type);
 }
@@ -615,36 +520,13 @@ document.addEventListener("click", (event) => {
       blankDraft = button.dataset.hint;
       input.focus();
     }
-  } else if (button.dataset.hyphint) {
-    const input = detailRoot.querySelector("#hypothesis-input");
+  } else if (button.dataset.sendhint) {
+    const input = detailRoot.querySelector("#send-input");
     if (input) {
-      input.value = button.dataset.hyphint;
-      hypothesisDraft = button.dataset.hyphint;
+      input.value = button.dataset.sendhint;
+      sendDraft = button.dataset.sendhint;
       input.focus();
     }
-  } else if (button.dataset.decide) {
-    // もう一度押すと選び直せるようにする。決めきれない回もある。
-    decideChoice = decideChoice === button.dataset.decide ? "" : button.dataset.decide;
-    // 描き直すと入力欄から焦点が飛ぶため、押した印だけを差し替える。
-    for (const node of detailRoot.querySelectorAll("[data-decide]")) {
-      const on = node.dataset.decide === decideChoice;
-      node.className = on ? "decide-button decide-button--on" : "decide-button";
-      node.setAttribute("aria-pressed", String(on));
-    }
-    if (decideChoice === "") reasonOpen = false;
-    const toggle = detailRoot.querySelector("#reason-toggle");
-    const field = detailRoot.querySelector("#reason-field");
-    if (toggle) {
-      toggle.hidden = decideChoice === "";
-      toggle.setAttribute("aria-expanded", String(reasonOpen));
-    }
-    if (field) field.hidden = !reasonOpen;
-  } else if (button.dataset.reasonToggle) {
-    reasonOpen = !reasonOpen;
-    const field = detailRoot.querySelector("#reason-field");
-    if (field) field.hidden = !reasonOpen;
-    button.setAttribute("aria-expanded", String(reasonOpen));
-    if (reasonOpen) detailRoot.querySelector("#reason-input")?.focus();
   } else if (button.dataset.help) {
     const panel = detailRoot.querySelector(`#help-${button.dataset.help}`);
     if (panel) {

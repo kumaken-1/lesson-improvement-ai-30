@@ -5,14 +5,8 @@ import { challenges } from "../js/challenges.js";
 import {
   BLANK_MARKER,
   CATEGORY_NAMES,
-  CLOSING_LABEL,
-  CLOSING_TEXT,
-  CORE_NOTE,
-  DECIDE_CHOICES,
-  DECIDE_LABEL,
+  CLOSING_NOTE,
   DECIDE_NOTE,
-  DECIDE_REASON_LABEL,
-  DECIDE_REASON_TOGGLE,
   FILL_TYPE,
   MATERIAL_LIMITS,
   PROMPT_LIMITS,
@@ -20,15 +14,12 @@ import {
   withLimits,
   FOLLOW_UP_STEPS,
   HELP_TEXTS,
-  HYPOTHESIS_LABEL,
-  HYPOTHESIS_NOTE,
   SAFETY_NOTE,
   SEND_TYPES,
   buildFilledText,
   categoryCounts,
   classifyChallengeHash,
   createViewModel,
-  decideOptions,
   filterChallenges,
   getChallengeById,
   getFocusSelector,
@@ -51,23 +42,12 @@ test("送り方は4種で、ラベルとアイコンが色とは別に用意さ�
   assert.ok(FILL_TYPE.icon.length > 0);
 });
 
-// 送る前の仮説、採用・修正・却下、変える一点。
-// 全30回で同じ文なので、回ごとの本文ではなくここに置く。
-test("教師が決める場面の共通文がそろっている", () => {
-  for (const text of [
-    HYPOTHESIS_LABEL,
-    HYPOTHESIS_NOTE,
-    DECIDE_LABEL,
-    DECIDE_NOTE,
-    DECIDE_REASON_LABEL,
-    CLOSING_LABEL,
-    CLOSING_TEXT,
-  ]) {
-    assert.ok(typeof text === "string" && text.length >= 8);
-  }
-  assert.deepEqual(DECIDE_CHOICES.map(({ id }) => id), ["adopt", "revise", "reject"]);
-  assert.match(DECIDE_NOTE, /却下/);
-  assert.match(CLOSING_TEXT, /一行/);
+// 採用・修正・却下と、変える一点は、記入欄ではなく共通の文で伝える。
+// 画面に記入欄を並べると、10回講座・校務版と操作の型が変わる。
+test("判断と変える一点は、共通の一文として持つ", () => {
+  assert.match(DECIDE_NOTE, /使わない/);
+  assert.match(CLOSING_NOTE, /一行/);
+  assert.match(CLOSING_NOTE, /この画面ではなく/);
   assert.match(SAFETY_NOTE, /児童A/);
 });
 
@@ -105,23 +85,13 @@ test("2回目で個数を指定する回は、1案を1文に制限する", () =>
   }
 });
 
-// 4か所すべて埋めないと終わらない教材に見せない。
-test("書く終点を先に示し、理由の記入は任意にする", () => {
-  assert.match(CORE_NOTE, /最初の考えと最後の一点だけ書けば完了/);
-  assert.match(DECIDE_REASON_TOGGLE, /任意/);
-  assert.match(CLOSING_LABEL, /ここまで書けば完了/);
-});
-
-test("三択の文は回ごとに持ち、空欄をうめて送る回だけ1回目に空欄がある", () => {
+// 空欄をうめて送る回だけ、1回目の文そのものに空欄がある。
+test("空欄をうめて送る回だけ、1回目に空欄がある", () => {
   const filled = challenges.find((item) => item.send.type === "fill");
   const pasted = challenges.find((item) => item.send.type === "paste");
   assert.equal(usesPromptBlank(filled), true);
   assert.equal(usesPromptBlank(pasted), false);
-
-  const options = decideOptions(filled);
-  assert.deepEqual(options.map(({ id }) => id), ["adopt", "revise", "reject"]);
-  assert.equal(options[0].text, filled.decide.adopt);
-  assert.ok(options.every(({ head }) => head.length > 0));
+  assert.ok(filled.send.hint.length > 0);
 });
 
 test("共通の補足は4本で、名前と本文を持つ", () => {
@@ -195,7 +165,6 @@ test("表示用のデータに、種別と試した印がそろう", () => {
   assert.equal(model.tried, true);
   assert.equal(model.steps.send.length, challenges[0].send.steps.length);
   assert.equal(model.steps.follow.length, 2);
-  assert.equal(model.decideChoices.length, 3);
   assert.equal(model.promptBlank, usesPromptBlank(challenges[0]));
 
   assert.equal(createViewModel(challenges[1], [1]).tried, false);

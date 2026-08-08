@@ -88,78 +88,6 @@ test("初心者向けの言い回しが画面に出る", async () => {
   assert.match(html, /生成AIを開けないときは、文章を読んで/);
 });
 
-// 授業改善では、AIの出力が主役に見える画面にしない。
-// 送る前の仮説と、採用・修正・却下を、画面上の行為として置く。
-test("送る前の考え、判断、変える一点が画面にある", async () => {
-  const app = await read("../js/app.js");
-  const css = await read("../css/styles.css");
-
-  for (const label of [
-    "HYPOTHESIS_LABEL",
-    "DECIDE_LABEL",
-    "CLOSING_LABEL",
-    '"hypothesis-input"',
-    '"reason-input"',
-    '"next-input"',
-    '"data-decide"',
-  ]) {
-    assert.ok(app.includes(label), `app.jsに無い: ${label}`);
-  }
-  // 描き直すと入力欄から焦点が飛ぶため、押した印だけを差し替える
-  assert.match(app, /querySelectorAll\("\[data-decide\]"\)/);
-  assert.match(app, /function clearDrafts/);
-  assert.match(css, /\.line-input\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(css, /\.decide-button/);
-
-  // 自分の考え→送る→返事→決める→もう一言→変える一点、の順で並べる。
-  // 返事より先に自分の考えを置かないと、AIの出力がそのまま自分の考えになる。
-  const renderDetail = app.slice(app.indexOf("function renderDetail"), app.indexOf("function showDialog"));
-  const order = [
-    "hypothesisBlock(model)",
-    "promptBlock(model)",
-    'className: "reply"',
-    "decideBlock(model)",
-    "fillBlock(model)",
-    "closingBlock()",
-  ];
-  let previous = -1;
-  for (const call of order) {
-    const index = renderDetail.indexOf(call);
-    assert.notEqual(index, -1, `renderDetail に無い: ${call}`);
-    assert.ok(index > previous, `並び順が違う: ${call}`);
-    previous = index;
-  }
-  for (const key of ["hypothesisDraft", "reasonDraft", "nextDraft", "decideChoice"]) {
-    assert.ok(!app.includes(`saveTried(${key}`), `書いた言葉を保存してはいけない: ${key}`);
-    assert.ok(!app.includes(`setItem(${key}`), `書いた言葉を保存してはいけない: ${key}`);
-  }
-});
-
-// 書く場所が並ぶと、任意でも「どこまで書けば終わりか」が見えなくなる。
-// 必須に見える経路は「最初の考え→2回目の空欄→最後の一点」の3か所に絞る。
-test("理由の記入欄は初期表示せず、判断を選んでから開く", async () => {
-  const app = await read("../js/app.js");
-  const css = await read("../css/styles.css");
-
-  // 冒頭で終点を示す
-  assert.match(app, /className: "core-note", text: CORE_NOTE/);
-  assert.match(css, /\.core-note/);
-
-  const decideBlock = app.slice(app.indexOf("function decideBlock"), app.indexOf("function closingBlock"));
-  // 判断を選ぶまで開くボタンを出さない
-  assert.match(decideBlock, /id: "reason-toggle"/);
-  assert.match(decideBlock, /hidden: decideChoice === ""/);
-  // 理由欄そのものは閉じた状態で置く
-  assert.match(decideBlock, /id: "reason-field"/);
-  assert.match(decideBlock, /hidden: !reasonOpen/);
-  assert.match(decideBlock, /DECIDE_REASON_TOGGLE/);
-
-  assert.match(app, /button\.dataset\.reasonToggle/);
-  assert.match(app, /let reasonOpen = false/);
-  // 判断を外したら、理由欄も閉じる
-  assert.match(app, /if \(decideChoice === ""\) reasonOpen = false/);
-});
-
 // 回答が長いと、着眼点にたどり着く前に読む負荷が勝つ。
 test("1回目の文に、検索させず短く答えさせる制約が出る", async () => {
   const app = await read("../js/app.js");
@@ -221,14 +149,12 @@ test("操作の種類ごとに色を分け、注意の色は他で使わない",
     "--paste-line:", "--paste-bg:", "--paste-ink:",
     "--attach-line:", "--attach-bg:", "--attach-ink:",
     "--fill-line:", "--fill-bg:", "--fill-ink:",
-    // 教師が自分で決める場面は、AIへ送る操作とは別の色で示す
-    "--self-line:", "--self-bg:", "--self-ink:",
     "--warn-line:", "--warn-bg:", "--warn-ink:",
   ]) {
     assert.ok(css.includes(token), `色の定義が無い: ${token}`);
   }
 
-  for (const type of ["asis", "paste", "attach", "fill", "self"]) {
+  for (const type of ["asis", "paste", "attach", "fill"]) {
     assert.match(
       css,
       new RegExp(`\\.block--${type}\\s*\\{[^}]*border-inline-start-color:\\s*var\\(--${type}-line\\)`, "s"),

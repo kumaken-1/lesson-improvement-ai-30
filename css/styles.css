@@ -27,11 +27,6 @@
   --fill-bg: #faeeda;
   --fill-ink: #633806;
 
-  /* 教師が自分で決める場面。送り方の色とは別に持つ。 */
-  --self-line: #3d4a5c;
-  --self-bg: #e9eef4;
-  --self-ink: #2a3543;
-
   /* 注意。この色は他の役割で使わない。 */
   --warn-line: #a32d2d;
   --warn-bg: #fcebeb;
@@ -430,93 +425,23 @@ button:hover {
   color: var(--fill-ink);
 }
 
-/* 送る前の一言、採用・修正・却下、変える一点。
-   AIに送る操作ではなく教師が決める場面なので、送り方の色とは分ける。 */
-.block--self {
-  border-inline-start-color: var(--self-line);
-}
-
-.block--self .block__label {
-  background: var(--self-bg);
-  color: var(--self-ink);
-}
-
-.self-question {
-  margin-block-end: 0.5rem;
+/* 返事に添える判断の一文。記入欄ではなく文で伝える。 */
+.reply__decide {
+  display: block;
+  margin-block-start: 0.35rem;
   font-weight: 700;
 }
 
-/* どこまで書けば終わりかを、開いてすぐに示す。 */
-.core-note {
-  margin-block-end: 1rem;
-  padding: 0.6rem 0.85rem;
-  border-radius: 0.6rem;
-  background: var(--self-bg);
-  color: var(--self-ink);
-  font-size: 0.92rem;
-  font-weight: 700;
-}
-
-.reason-field {
-  margin-block-start: 0.6rem;
-}
-
-/* 全30回に共通で付く制約。本文と混ざらないよう行を分ける。 */
-.prompt__limits {
-  display: block;
-  margin-block-start: 0.5rem;
-  font-size: 0.92rem;
-}
-
-.line-input {
-  display: block;
-  width: 100%;
-  min-height: 44px;
-  padding: 0.4rem 0.7rem;
-  border: 2px solid var(--self-line);
-  border-radius: 0.5rem;
-  font: inherit;
-  color: var(--ink);
-  background: var(--surface);
-}
-
-.decide-list {
-  display: grid;
-  gap: 0.4rem;
-  margin-block-end: 0.6rem;
-  padding: 0;
-  list-style: none;
-}
-
-.decide-button {
+/* 最後に手元へ書き留めることを伝える一文。画面に記入欄は置かない。 */
+.closing-note {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 0.5rem;
-  width: 100%;
-  text-align: start;
-  font-weight: 400;
-  border-color: var(--self-line);
-  color: var(--self-ink);
-  background: var(--surface);
-}
-
-.decide-button__head {
-  flex: none;
-  padding: 0.05rem 0.5rem;
-  border-radius: 999px;
-  background: var(--self-bg);
-  font-size: var(--label-size);
-  font-weight: 700;
-}
-
-.decide-button--on {
-  color: #fff;
-  background: var(--self-line);
-}
-
-.decide-button--on .decide-button__head {
-  background: #fff;
-  color: var(--self-ink);
+  margin-block: 1.1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.6rem;
+  background: #eef2f4;
+  font-size: 0.95rem;
 }
 
 .steps {
@@ -588,6 +513,13 @@ button:hover {
   border-color: var(--fill-line);
   background: var(--fill-bg);
   color: var(--fill-ink);
+}
+
+/* 全30回に共通で付く制約。本文と混ざらないよう行を分ける。 */
+.prompt__limits {
+  display: block;
+  margin-block-start: 0.5rem;
+  font-size: 0.92rem;
 }
 
 .blank-input {

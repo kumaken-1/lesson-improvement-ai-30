@@ -74,39 +74,22 @@ export function withLimits(text, type) {
   return `${String(text ?? "")}\n\n${promptLimits(type)}`;
 }
 
-// 4か所すべて書かないと終わらない教材に見せない。
-// 任意だと書くだけでは「どこまで書けば終わりか」が分からないため、終点を先に示す。
-export const CORE_NOTE = "時間がないときは、最初の考えと最後の一点だけ書けば完了です。";
-
-// AIに送る前に、自分の考えを先に置く。
-// 比べる相手がないと、AIの整った出力がそのまま自分の考えになる。
-export const HYPOTHESIS_LABEL = "送る前に — 自分の考えを一言";
-export const HYPOTHESIS_NOTE =
-  "先に自分の考えを置くと、返事を読んだとき「自分と違うのはどこか」から入れます。書かなくても先へ進めます。";
-
-// 採用・修正・却下を画面上の行為にする。
+// 採用・修正・却下は、記入欄や選択ボタンではなく文で伝える。
+// 画面に記入欄を並べると、10回講座・校務版と操作の型が変わり、
+// 参加のたびにやり方を覚え直すことになる。
 // 「却下」で終わる回があってよい。使わない判断も、その回の結論として認める。
-export const DECIDE_LABEL = "返事を読んで決める";
-export const DECIDE_CHOICES = [
-  { id: "adopt", head: "採用" },
-  { id: "revise", head: "修正" },
-  { id: "reject", head: "却下" },
-];
-export const DECIDE_REASON_LABEL = "そう決めた理由を、一行だけ書きます";
-// 判断は残すが、理由の記入は深めたい人だけが開く形にする。
-export const DECIDE_REASON_TOGGLE = "理由も一言残す（任意）";
 export const DECIDE_NOTE =
-  "却下を選んで終わってよい回もあります。AIを使わないという判断も、その回の結論です。";
+  "読んだら、採用するか、直すか、使わないかを決めます。使わないという判断も、その回の結論です。";
 
 export const FOLLOW_UP_STEPS = [
   { text: "下の空欄を、自分の言葉でうめます" },
   { text: "できた文を、新しいメッセージとして送信します", help: "newmsg" },
 ];
 
-// 全30回で同じ問いなので、回ごとの本文には書かない。
-export const CLOSING_LABEL = "最後に — 今日変える一点（ここまで書けば完了）";
-export const CLOSING_TEXT =
-  "次の授業で実際に変えることを、一行だけ書きます。授業案ではなく、発問、順番、時間の使い方、見取る場面のような、実行できる形にします。";
+// 全30回で同じ文なので、回ごとの本文には書かない。
+// 書く場所はこの画面ではなく手元にする。授業記録に触れた言葉を端末に残さないため。
+export const CLOSING_NOTE =
+  "最後に、次の授業で変える一点を一行だけ書き留めます。授業案ではなく、発問、順番、時間の使い方、見取る場面のような、実行できる形にします。書く場所はこの画面ではなく、手元の手帳や指導案です。";
 
 export const SAFETY_NOTE =
   "子どもの名前は「児童A」などに置き換えます。学習の記録、健康に関すること、家庭のことは入力しません。";
@@ -166,24 +149,20 @@ export function buildFilledText(template, value = "") {
     .replace(BLANK_MARKER, filled === "" ? BLANK_PLACEHOLDER : filled);
 }
 
-// 空欄をうめて送る回では、1回目の文の空欄が「自分の考え」の置き場所になる。
-// 仮説を書く欄と送る文の空欄を別に置くと、同じことを2回書かせることになる。
+// 空欄をうめて送る回では、1回目の文そのものに空欄がある。
+// 自分の見立てを書く行為と、送る文を組み立てる行為を1つにするため、
+// 記入欄を別に立てない。書くのは送る文の一部だけ。
 export function usesPromptBlank(challenge) {
   return challenge.send.type === "fill";
 }
 
 // 手順の番号は「1回目」から「2回目」まで通しで振る。
 // 返事を挟んだ一続きの流れとして見せるため、途中で1に戻さない。
-// 仮説・判断・変える一点は送る操作ではないので、番号を振らない。
 export function numberedSteps(challenge) {
   const send = challenge.send.steps.map((step, index) => ({ ...step, number: index + 1 }));
   const offset = send.length;
   const follow = FOLLOW_UP_STEPS.map((step, index) => ({ ...step, number: offset + index + 1 }));
   return { send, follow };
-}
-
-export function decideOptions(challenge) {
-  return DECIDE_CHOICES.map((choice) => ({ ...choice, text: challenge.decide[choice.id] }));
 }
 
 export function createViewModel(challenge, tried) {
@@ -192,7 +171,6 @@ export function createViewModel(challenge, tried) {
     categoryName: CATEGORY_NAMES[challenge.category] ?? "",
     sendType: SEND_TYPES[challenge.send.type] ?? SEND_TYPES.fill,
     steps: numberedSteps(challenge),
-    decideChoices: decideOptions(challenge),
     promptBlank: usesPromptBlank(challenge),
     tried: isTried(tried, challenge.id),
   };

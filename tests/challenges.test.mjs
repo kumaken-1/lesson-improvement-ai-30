@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { CATEGORIES, challenges } from "../js/challenges.js";
-import { BLANK_MARKER, DECIDE_CHOICES, HELP_TEXTS, SEND_TYPES } from "../js/view-model.js";
+import { BLANK_MARKER, HELP_TEXTS, SEND_TYPES } from "../js/view-model.js";
 
 const EXPECTED_CATEGORY_COUNTS = {
   material: 5,
@@ -32,17 +32,18 @@ test("カテゴリーは6種で、件数が設計どおり", () => {
 });
 
 test("表示に必要なデータがそろっている", () => {
-  const keys = ["id", "category", "title", "intro", "hypothesis", "send", "reply", "decide", "followUp"];
+  const keys = ["id", "category", "title", "intro", "send", "reply", "followUp"];
   for (const item of challenges) {
     assert.deepEqual(Object.keys(item).sort(), [...keys].sort(), `id ${item.id}`);
     assert.ok(item.title.length >= 6, `id ${item.id} の題名が短すぎる`);
     assert.ok(item.intro.length >= 40, `id ${item.id} の紹介文が短すぎる`);
-    assert.deepEqual(Object.keys(item.hypothesis).sort(), ["hint", "text"], `id ${item.id}`);
-    assert.deepEqual(Object.keys(item.send).sort(), ["prompt", "steps", "type"], `id ${item.id}`);
+    const sendKeys = item.send.type === "fill"
+      ? ["hint", "prompt", "steps", "type"]
+      : ["prompt", "steps", "type"];
+    assert.deepEqual(Object.keys(item.send).sort(), sendKeys, `id ${item.id}`);
     assert.ok(SEND_TYPES[item.send.type], `id ${item.id} の送り方が不正`);
     assert.ok(item.send.prompt.length > 0);
     assert.ok(item.send.steps.length >= 2, `id ${item.id} の手順が少なすぎる`);
-    assert.deepEqual(Object.keys(item.decide).sort(), ["adopt", "reject", "revise"], `id ${item.id}`);
     assert.deepEqual(Object.keys(item.followUp).sort(), ["hints", "template"], `id ${item.id}`);
   }
 });
@@ -59,31 +60,16 @@ test("紹介文は2文以上で、読み手の場面から入る", () => {
   }
 });
 
-// AIへ送る前に自分の考えを置く工程を、本文の注意ではなくデータとして持たせる。
-// 比べる相手がないと、返事の整った文がそのまま自分の考えになる。
-test("全30回に、送る前の自分の考えを書く工程がある", () => {
-  const texts = [];
+// 空欄をうめて送る回では、送る文の空欄が自分の見立ての置き場所になる。
+// 記入欄を別に立てないので、空欄に何を入れるかは例で示す。
+test("空欄をうめて送る回だけ、空欄に入れる語の例を持つ", () => {
   for (const item of challenges) {
-    const { text, hint } = item.hypothesis;
-    assert.ok(text.length >= 15, `id ${item.id} の問いが短すぎる`);
-    assert.match(text, /書きます。?$/, `id ${item.id} の問いが書く指示になっていない`);
-    assert.ok(hint.trim().length > 0, `id ${item.id} の例が空`);
-    assert.doesNotMatch(hint, /てください。?$|。$/, `id ${item.id} の例に文末表現がある`);
-    texts.push(text);
-  }
-  assert.equal(new Set(texts).size, 30, "送る前の問いが使い回されている");
-});
-
-// AIを使うことが前提の教材にしないため、却下を選べる状態を各回に持たせる。
-test("全30回に、採用・修正・却下の三択がある", () => {
-  for (const item of challenges) {
-    for (const { id } of DECIDE_CHOICES) {
-      const text = item.decide[id];
-      assert.ok(text.length >= 6, `id ${item.id} の ${id} が短すぎる`);
-      assert.doesNotMatch(text, /。$/, `id ${item.id} の ${id} に句点がある`);
+    if (item.send.type === "fill") {
+      assert.ok(item.send.hint?.trim().length > 0, `id ${item.id} に例がない`);
+      assert.doesNotMatch(item.send.hint, /てください。?$|。$/, `id ${item.id} の例に文末表現がある`);
+    } else {
+      assert.equal(item.send.hint, undefined, `id ${item.id} に不要な例がある`);
     }
-    const values = DECIDE_CHOICES.map(({ id }) => item.decide[id]);
-    assert.equal(new Set(values).size, 3, `id ${item.id} の三択が同じ文になっている`);
   }
 });
 
@@ -183,11 +169,9 @@ test("ゲーム由来の語と、回どうしの参照を残さない", () => {
     item.title,
     item.intro,
     item.reply,
-    item.hypothesis.text,
-    item.hypothesis.hint,
     item.send.prompt,
+    item.send.hint ?? "",
     item.followUp.template,
-    ...Object.values(item.decide),
     ...item.followUp.hints,
     ...item.send.steps.map(({ text }) => text),
   ]).join("\n");
@@ -201,8 +185,7 @@ test("ゲーム由来の語と、回どうしの参照を残さない", () => {
 test("入力例に個人情報を求めない", () => {
   const source = challenges.flatMap((item) => [
     item.send.prompt,
-    item.hypothesis.text,
-    item.hypothesis.hint,
+    item.send.hint ?? "",
     item.followUp.template,
     ...item.followUp.hints,
   ]).join("\n");

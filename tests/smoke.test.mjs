@@ -7,6 +7,9 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
+import { challenges } from "../js/challenges.js";
+import { withLimits } from "../js/view-model.js";
+
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT_TYPES = {
   ".css": "text/css; charset=utf-8",
@@ -156,9 +159,14 @@ test("そのまま送る文と、空欄をうめる文が別物として示さ�
   await withPage(async (page) => {
     await page.goto(`${baseURL}/#c-${ATTACH_ID}`, { waitUntil: "networkidle" });
 
-    const sendPrompt = await page.locator('[data-prompt="send"]').textContent();
+    // コピーされる文は「本文 + 空行 + 共通の制約」。画面では制約を別行に出すため、
+    // DOMの textContent と突き合わせると区切りの改行のぶんだけ食い違う。
+    // 期待値は本文データから組み立てて、コピーの中身そのものを確かめる。
+    const challenge = challenges.find((item) => item.id === ATTACH_ID);
+    const sendPrompt = withLimits(challenge.send.prompt, challenge.send.type);
     await page.getByRole("button", { name: "この文章をコピー" }).click();
     assert.equal(await page.evaluate(() => window.__copied), sendPrompt);
+    assert.match(sendPrompt, /\n\nWeb検索はせず/);
 
     // 空欄は文の中の入力欄。組み立て結果を別に置かない。
     assert.equal(await page.locator('[data-prompt="fill"]').count(), 1);
@@ -183,85 +191,32 @@ test("そのまま送る文と、空欄をうめる文が別物として示さ�
   });
 });
 
-// AIの出力が主役に見える画面にしない。
-// 送る前の考えと、採用・修正・却下が、画面上の行為として動くことを確かめる。
-test("送る前に自分の考えを書き、採用・修正・却下を選べる", async () => {
-  await withPage(async (page) => {
-    await page.goto(`${baseURL}/#c-${ATTACH_ID}`, { waitUntil: "networkidle" });
-    const detail = page.locator("#challenge-detail");
-
-    // 並び順。返事より前に自分の考えを書く欄がある。
-    const text = await detail.innerText();
-    const order = ["送る前に", "1回目 —", "返事が来ます", "返事を読んで決める", "2回目 —", "最後に"];
-    let previous = -1;
-    for (const label of order) {
-      const index = text.indexOf(label);
-      assert.notEqual(index, -1, `画面に無い: ${label}`);
-      assert.ok(index > previous, `並び順が違う: ${label}`);
-      previous = index;
-    }
-
-    // 却下を選んで終わってよいことが、画面に書かれている
-    assert.match(text, /却下を選んで終わってよい回もあります/);
-    // どこまで書けば終わりかを、開いてすぐに示す
-    assert.match(text, /時間がないときは、最初の考えと最後の一点だけ書けば完了です。/);
-    // 回答を短くする制約が1回目の文に出る
-    assert.match(await page.locator('[data-prompt="send"]').innerText(), /Web検索はせず/);
-
-    await page.locator("#hypothesis-input").fill("じぶんの見立て");
-
-    // 理由の記入欄は、判断を選ぶまで出さない
-    assert.equal(await page.locator("#reason-toggle").isVisible(), false);
-    assert.equal(await page.locator("#reason-field").isVisible(), false);
-
-    assert.equal(await page.locator('[data-decide="reject"]').getAttribute("aria-pressed"), "false");
-    await page.locator('[data-decide="reject"]').click();
-    assert.equal(await page.locator('[data-decide="reject"]').getAttribute("aria-pressed"), "true");
-    assert.equal(await page.locator('[data-decide="adopt"]').getAttribute("aria-pressed"), "false");
-
-    // 選んだあとに開けるようになる。開くまで入力欄は出ない。
-    assert.equal(await page.locator("#reason-toggle").isVisible(), true);
-    assert.equal(await page.locator("#reason-field").isVisible(), false);
-    await page.locator("#reason-toggle").click();
-    assert.equal(await page.locator("#reason-field").isVisible(), true);
-    await page.locator("#reason-input").fill("りゆう");
-
-    // 押し直すと選び直せる。決めきれない回もある。
-    await page.locator('[data-decide="reject"]').click();
-    assert.equal(await page.locator('[data-decide="reject"]').getAttribute("aria-pressed"), "false");
-    // 判断を外したら、理由欄も畳む
-    assert.equal(await page.locator("#reason-toggle").isVisible(), false);
-    assert.equal(await page.locator("#reason-field").isVisible(), false);
-
-    // 判断を選んでも、書いた言葉が消えない
-    assert.equal(await page.locator("#hypothesis-input").inputValue(), "じぶんの見立て");
-
-    await page.locator("#next-input").fill("かえる一点");
-
-    // 書いた言葉は端末に残さない
-    await page.reload({ waitUntil: "networkidle" });
-    assert.equal(await page.locator("#hypothesis-input").inputValue(), "");
-    assert.equal(await page.locator("#reason-input").inputValue(), "");
-    assert.equal(await page.locator("#next-input").inputValue(), "");
-    const stored = await page.evaluate((key) => localStorage.getItem(key) ?? "", STORAGE_KEY);
-    for (const word of ["じぶんの見立て", "りゆう", "かえる一点"]) {
-      assert.ok(!stored.includes(word), `端末に残っている: ${word}`);
-    }
-  });
-});
-
-// 空欄をうめて送る回は、送る前の考えがそのまま1回目の文に入る。
-// 仮説を書く欄と送る文の空欄を分けると、同じことを2回書かせることになる。
-test("空欄をうめて送る回は、自分の考えが1回目の文に入る", async () => {
+// 空欄をうめて送る回は、自分の見立てを書く行為と送る文を組み立てる行為が1つになる。
+// 記入欄を別に立てないので、入力欄は送る文の中だけにある。
+test("空欄をうめて送る回は、1回目の文そのものが入力欄になる", async () => {
   await withPage(async (page) => {
     await page.goto(`${baseURL}/#c-${FILL_ID}`, { waitUntil: "networkidle" });
+    const detail = page.locator("#challenge-detail");
 
-    assert.equal(await page.locator('[data-prompt="send"] #hypothesis-input').count(), 1);
-    await page.locator("#hypothesis-input").fill("判断が変わる場面");
+    assert.equal(await detail.locator('[data-prompt="send"] #send-input').count(), 1);
+    // 画面に置く入力欄は、1回目と2回目の空欄の2つだけ
+    assert.equal(await detail.locator("input").count(), 2);
+
+    await detail.locator("[data-sendhint]").click();
+    const hint = await detail.locator("[data-sendhint]").textContent();
+    assert.equal(await page.locator("#send-input").inputValue(), hint);
+
+    await page.locator("#send-input").fill("判断が変わる場面");
     await page.getByRole("button", { name: "うめた文をコピー" }).first().click();
     const copied = await page.evaluate(() => window.__copied);
     assert.match(copied, /判断が変わる場面/);
     assert.doesNotMatch(copied, /____/);
+
+    // 書いた言葉は端末に残さない
+    await page.reload({ waitUntil: "networkidle" });
+    assert.equal(await page.locator("#send-input").inputValue(), "");
+    const stored = await page.evaluate((key) => localStorage.getItem(key) ?? "", STORAGE_KEY);
+    assert.ok(!stored.includes("判断が変わる場面"));
   });
 });
 
