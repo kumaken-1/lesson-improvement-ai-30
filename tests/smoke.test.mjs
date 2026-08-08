@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
 import { challenges } from "../js/challenges.js";
-import { withLimits } from "../js/view-model.js";
+import { promptLimits, withLimits } from "../js/view-model.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT_TYPES = {
@@ -166,7 +166,9 @@ test("そのまま送る文と、空欄をうめる文が別物として示さ�
     const sendPrompt = withLimits(challenge.send.prompt, challenge.send.type);
     await page.getByRole("button", { name: "この文章をコピー" }).click();
     assert.equal(await page.evaluate(() => window.__copied), sendPrompt);
-    assert.match(sendPrompt, /\n\nWeb検索はせず/);
+    // 本文と制約は空行で区切る。制約の先頭は送り方で変わる（資料を渡す回は一文増える）。
+    assert.match(sendPrompt, /\n\n/);
+    assert.ok(sendPrompt.endsWith(promptLimits(challenge.send.type)));
 
     // 空欄は文の中の入力欄。組み立て結果を別に置かない。
     assert.equal(await page.locator('[data-prompt="fill"]').count(), 1);
