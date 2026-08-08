@@ -352,7 +352,7 @@ function renderDetail() {
     el("div", { className: "stage-flow" }, [
       promptBlock(model),
       // 採用・修正・却下は、記入欄ではなく文で伝える。10回講座・校務版と操作の型を変えない。
-      // smoke.test.mjs が .reply の全文を「返事が来ます」で始まると検査するため、
+      // smoke.test.mjs が .reply の全文を「回答が来ます」で始まると検査するため、
       // 段階の番号は（innerTextに含まれない）CSSの疑似要素の丸印だけで示す。
       el("p", { className: "reply" }, [
         createIcon("arrow"),

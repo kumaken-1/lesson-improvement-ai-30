@@ -90,13 +90,13 @@ test("2通目は空欄ひとつと例3つを持ち、言い回しが偏らない
   assert.ok(leading <= 10, `「私は」で始まる文が多すぎる: ${leading}`);
 });
 
-test("返事を読む場面が、毎回その回のねらいとして書かれている", () => {
+test("回答を読む場面が、毎回その回のねらいとして書かれている", () => {
   const replies = challenges.map(({ reply }) => reply);
   for (const [index, reply] of replies.entries()) {
-    assert.match(reply, /^返事が来ます/, `id ${index + 1}`);
+    assert.match(reply, /^回答が来ます/, `id ${index + 1}`);
     assert.ok(reply.length >= 20, `id ${index + 1} の一行が短すぎる`);
   }
-  assert.equal(new Set(replies).size, 30, "返事の一行が使い回されている");
+  assert.equal(new Set(replies).size, 30, "回答の一行が使い回されている");
 });
 
 test("手順は送信の回数と、同じメッセージであることを明示する", () => {

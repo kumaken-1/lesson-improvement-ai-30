@@ -54,7 +54,7 @@ export const HELP_TEXTS = {
 };
 
 // 全30回の1回目の末尾に付ける制約。
-// この講座の目的は詳しい授業助言を得ることではなく、返事を短時間で吟味すること。
+// この講座の目的は詳しい授業助言を得ることではなく、回答を短時間で吟味すること。
 // 回答が長いと着眼点にたどり着く前に読む負荷が勝ち、検索結果の権威性は教師の判断を弱める。
 export const PROMPT_LIMITS =
   "Web検索はせず、ここに書いた情報だけを使ってください。各項目は2文以内で書いてください。";
@@ -157,7 +157,7 @@ export function usesPromptBlank(challenge) {
 }
 
 // 手順の番号は「1回目」から「2回目」まで通しで振る。
-// 返事を挟んだ一続きの流れとして見せるため、途中で1に戻さない。
+// 回答を挟んだ一続きの流れとして見せるため、途中で1に戻さない。
 export function numberedSteps(challenge) {
   const send = challenge.send.steps.map((step, index) => ({ ...step, number: index + 1 }));
   const offset = send.length;

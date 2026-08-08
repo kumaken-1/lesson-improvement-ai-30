@@ -40,7 +40,7 @@ test("30件すべての本文が紙面に載る", async () => {
       html.includes(escapeHtml(printableTemplate(challenge.send.prompt))),
       `送る文が無い: id ${challenge.id}`,
     );
-    assert.ok(html.includes(escapeHtml(challenge.reply)), `返事の一行が無い: id ${challenge.id}`);
+    assert.ok(html.includes(escapeHtml(challenge.reply)), `回答の一行が無い: id ${challenge.id}`);
     assert.ok(
       html.includes(escapeHtml(printableTemplate(challenge.followUp.template))),
       `2通目が無い: id ${challenge.id}`,

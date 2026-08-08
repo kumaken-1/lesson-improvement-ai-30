@@ -140,9 +140,9 @@ test("1回目と2回目が分かれ、番号が通しで振られる", async () 
 
     assert.match(await detail.innerText(), /1回目 — 資料を添付してから送る/);
     assert.match(await detail.innerText(), /2回目 — 空欄をうめてから送る/);
-    assert.match(await page.locator(".reply").innerText(), /^返事が来ます/);
+    assert.match(await page.locator(".reply").innerText(), /^回答が来ます/);
 
-    // 手順の番号は返事を挟んでも1に戻さない
+    // 手順の番号は回答を挟んでも1に戻さない
     const values = await page.locator(".steps__item").evaluateAll(
       (items) => items.map((item) => Number(item.value)),
     );

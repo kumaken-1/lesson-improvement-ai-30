@@ -27,10 +27,17 @@
   --fill-bg: #faeeda;
   --fill-ink: #633806;
 
-  /* 注意。この色は他の役割で使わない。 */
-  --warn-line: #a32d2d;
-  --warn-bg: #fcebeb;
-  --warn-ink: #791f1f;
+  /* AIの回答。淡いピンクは、画面の中でここだけに使う。
+     自分が手を動かすところ（白）と、AIが返してくるところ（ピンク）を、
+     読む前に見分けられるようにするための色。 */
+  --reply-line: #c96a8c;
+  --reply-bg: #fdeaf0;
+
+  /* 注意。淡いオレンジ。この色は他の役割で使わない。
+     空欄をうめる琥珀色（--fill-bg）と近くならないよう、桃色寄りに振ってある。 */
+  --warn-line: #c2571a;
+  --warn-bg: #fbdcc4;
+  --warn-ink: #7a3208;
 
   --done: #1f7a5c;
 }
@@ -372,7 +379,8 @@ button:hover {
   margin-block-end: 1.5rem;
 }
 
-/* 送る→読む→送るの3段階を、丸い番号の印と縦線でひとつながりに見せる。
+/* 送る→読む→送るの3段階を、縦線でひとつながりに見せる。
+   番号が付くのは自分が送る2回だけで、読む段階はピンクの丸で示す。
    各段階の背景色が線の上に重なるので、線は段階のすき間だけに見える。 */
 .stage-flow {
   position: relative;
@@ -396,8 +404,8 @@ button:hover {
   z-index: 1;
 }
 
-.stage-flow > .block::before,
-.stage-flow > .reply::before {
+/* 番号は、自分が送る2回にだけ振る。AIの回答は自分の操作ではないので番号を持たない。 */
+.stage-flow > .block::before {
   counter-increment: stage;
   content: counter(stage);
   position: absolute;
@@ -414,6 +422,20 @@ button:hover {
   color: #fff;
   font-weight: 700;
   font-size: 0.95rem;
+}
+
+/* 番号の代わりに、線の上にピンクの丸だけを置いて流れを切らない。 */
+.stage-flow > .reply::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset-inline-start: 0.48rem;
+  inset-block-start: 0.7rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 2px solid var(--reply-line);
+  border-radius: 50%;
+  background: var(--reply-bg);
 }
 
 .block {
@@ -469,7 +491,7 @@ button:hover {
   color: var(--fill-ink);
 }
 
-/* 返事に添える判断の一文。記入欄ではなく文で伝える。 */
+/* 回答に添える判断の一文。記入欄ではなく文で伝える。 */
 .reply__decide {
   display: block;
   margin-block-start: 0.35rem;
@@ -636,15 +658,16 @@ button:hover {
   background: #7d5612;
 }
 
+/* 自分の操作（白い枠）と並べたとき、ここだけがAIの側だと分かるようにする。 */
 .reply {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
   margin-block: 1.1rem;
   padding: 0.7rem 0.9rem 0.7rem 2.6rem;
-  border-inline-start: 4px solid #8a97a3;
+  border-inline-start: 4px solid var(--reply-line);
   border-radius: 0.6rem;
-  background: #eef2f4;
+  background: var(--reply-bg);
   font-size: 0.95rem;
 }
 
