@@ -348,16 +348,21 @@ function renderDetail() {
     ]),
     el("div", { className: "detail__intro" },
       model.intro.split("\n").map((line) => el("p", { text: line }))),
-    promptBlock(model),
-    // 採用・修正・却下は、記入欄ではなく文で伝える。10回講座・校務版と操作の型を変えない。
-    el("p", { className: "reply" }, [
-      createIcon("arrow"),
-      el("span", {}, [
-        el("span", { text: model.reply }),
-        el("span", { className: "reply__decide", text: DECIDE_NOTE }),
+    // 3段階（送る→読む→送る）を1本の流れとして見せる。丸い番号の印と縦線は stage-flow が受け持つ。
+    el("div", { className: "stage-flow" }, [
+      promptBlock(model),
+      // 採用・修正・却下は、記入欄ではなく文で伝える。10回講座・校務版と操作の型を変えない。
+      // smoke.test.mjs が .reply の全文を「返事が来ます」で始まると検査するため、
+      // 段階の番号は（innerTextに含まれない）CSSの疑似要素の丸印だけで示す。
+      el("p", { className: "reply" }, [
+        createIcon("arrow"),
+        el("span", {}, [
+          el("span", { text: model.reply }),
+          el("span", { className: "reply__decide", text: DECIDE_NOTE }),
+        ]),
       ]),
+      fillBlock(model),
     ]),
-    fillBlock(model),
     el("p", { className: "closing-note" }, [
       createIcon("flag", { size: 16 }),
       el("span", { text: CLOSING_NOTE }),

@@ -21,7 +21,7 @@ test("HTMLがJavaScriptより先に、日本語の骨組みを出す", async () 
   assert.match(html, /<html\s+lang="ja"/i);
   assert.match(html, /<meta\s+charset="utf-8"/i);
   assert.match(html, /<meta\s+name="viewport"\s+content="width=device-width,\s*initial-scale=1"/i);
-  assert.match(html, /<title>生成AI 30のチャレンジⅢ ～授業改善～<\/title>/);
+  assert.match(html, /<title>生成AI 30のチャレンジⅣ ～授業改善を生成AIとの対話で進める～<\/title>/);
   assert.match(html, /<link\s+rel="stylesheet"\s+href="\.\/css\/styles\.css"/i);
   assert.match(html, /<link\s+rel="stylesheet"\s+href="\.\/css\/print\.css"\s+media="print"/i);
   assert.match(html, /<a[^>]+href="#main"/i);

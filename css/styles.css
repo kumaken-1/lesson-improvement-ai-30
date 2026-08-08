@@ -372,9 +372,53 @@ button:hover {
   margin-block-end: 1.5rem;
 }
 
+/* 送る→読む→送るの3段階を、丸い番号の印と縦線でひとつながりに見せる。
+   各段階の背景色が線の上に重なるので、線は段階のすき間だけに見える。 */
+.stage-flow {
+  position: relative;
+  counter-reset: stage;
+}
+
+.stage-flow::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset-inline-start: 1.05rem;
+  inset-block-start: 0.9rem;
+  inset-block-end: 0.9rem;
+  width: 2px;
+  background: #c3ccd4;
+}
+
+.stage-flow > .block,
+.stage-flow > .reply {
+  position: relative;
+  z-index: 1;
+}
+
+.stage-flow > .block::before,
+.stage-flow > .reply::before {
+  counter-increment: stage;
+  content: counter(stage);
+  position: absolute;
+  z-index: 2;
+  inset-inline-start: 0.1rem;
+  inset-block-start: 0.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
 .block {
   margin-block-end: 1rem;
-  padding-inline-start: 0.9rem;
+  padding-inline-start: 2.6rem;
   border-inline-start: 4px solid #c3ccd4;
 }
 
@@ -385,7 +429,7 @@ button:hover {
   margin-block-end: 0.6rem;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  font-size: var(--label-size);
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
@@ -597,7 +641,8 @@ button:hover {
   align-items: flex-start;
   gap: 0.5rem;
   margin-block: 1.1rem;
-  padding: 0.7rem 0.9rem;
+  padding: 0.7rem 0.9rem 0.7rem 2.6rem;
+  border-inline-start: 4px solid #8a97a3;
   border-radius: 0.6rem;
   background: #eef2f4;
   font-size: 0.95rem;
