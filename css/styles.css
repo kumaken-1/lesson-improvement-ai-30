@@ -550,6 +550,12 @@ button:hover {
   color: #2c3a4a;
 }
 
+/* hidden を付けても display: block が勝ってしまい、補足が開きっぱなしになる。
+   押しても乗せても閉じたところから始まるよう、hidden のときは隠す。 */
+.help__panel[hidden] {
+  display: none;
+}
+
 .prompt {
   padding: 0.85rem 1rem;
   border: 2px solid var(--ink);
