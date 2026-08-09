@@ -843,3 +843,51 @@ dialog::backdrop {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* シリーズの巻を横並びで置く。いまいる巻はリンクにせず、現在地として示す。
+   狭い画面では折り返す。指で押せるよう、どの項目も44px以上の高さを持つ。 */
+.volumes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.6rem;
+  max-width: 60rem;
+  margin-inline: auto;
+  padding: 0.35rem 1rem;
+  border-block-end: 1px solid #dce6e5;
+  font-size: 0.9rem;
+}
+
+.volumes__label {
+  color: #5b6b7a;
+  font-size: 0.82rem;
+}
+
+.volumes__note {
+  color: #5b6b7a;
+  font-size: 0.82rem;
+}
+
+.volumes__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.volumes__list a,
+.volumes__current {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 0.5rem;
+  border-radius: 0.4rem;
+}
+
+.volumes__current {
+  background: #eef2f7;
+  color: #24313f;
+  font-weight: 700;
+}
