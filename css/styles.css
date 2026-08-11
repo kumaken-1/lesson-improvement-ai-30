@@ -930,6 +930,17 @@ dialog::backdrop {
   font-size: 0.9rem;
 }
 
+/* シリーズの入口(ai-challenge)へ戻るリンク。個々の巻の一覧より前に置く。 */
+.volumes__home {
+  color: var(--focus);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.volumes__home:hover {
+  text-decoration: underline;
+}
+
 .volumes__label {
   color: #5b6b7a;
   font-size: 0.82rem;
